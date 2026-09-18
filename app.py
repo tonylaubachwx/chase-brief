@@ -137,7 +137,6 @@ SPC_COLORS = {
     "HIGH": "#ff00ff"
 }
 
-# Mapping helpers for dropdown display
 OFFICE_OPTIONS = [f"{cwa} — {data['name']}" for cwa, data in CHASE_CWAS.items()]
 CWA_TO_OPTION = {cwa: f"{cwa} — {data['name']}" for cwa, data in CHASE_CWAS.items()}
 OPTION_TO_CWA = {f"{cwa} — {data['name']}": cwa for cwa, data in CHASE_CWAS.items()}
@@ -149,7 +148,7 @@ def fetch_spc_geojson(layer_id: int):
     """Queries NOAA's ArcGIS FeatureServer for real-time SPC outlook polygons."""
     url = f"https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/SPC_wx_outlks/FeatureServer/{layer_id}/query"
     params = {"where": "1=1", "outFields": "*", "f": "geojson", "outSR": "4326"}
-    headers = {"User-Agent": "(ChaseBriefGenerator/1.5, contact: stormbriefs@weatherops.org)"}
+    headers = {"User-Agent": "(ChaseBriefGenerator/1.6, contact: stormbriefs@weatherops.org)"}
     try:
         r = httpx.get(url, params=params, headers=headers, timeout=7.0)
         if r.status_code == 200:
@@ -163,7 +162,7 @@ def fetch_cwa_boundaries():
     """Queries official NOAA NWS Reference MapServer for CWA polygons."""
     url = "https://mapservices.weather.noaa.gov/static/rest/services/nws_reference_maps/nws_reference_map/FeatureServer/1/query"
     params = {"where": "1=1", "outFields": "cwa,wfo", "f": "geojson", "outSR": "4326"}
-    headers = {"User-Agent": "(ChaseBriefGenerator/1.5, contact: stormbriefs@weatherops.org)"}
+    headers = {"User-Agent": "(ChaseBriefGenerator/1.6, contact: stormbriefs@weatherops.org)"}
     try:
         r = httpx.get(url, params=params, headers=headers, timeout=12.0)
         if r.status_code == 200:
@@ -227,10 +226,8 @@ def auto_detect_cwas_in_risk(spc_geojson, max_limit=10):
     return list(matching_cwas)[:max_limit]
 
 # --- SESSION STATE INITIALIZATION ---
-if "selected_cwas" not in st.session_state:
-    st.session_state.selected_cwas = user_cfg.get("last_selected_cwas", ["BOU", "GLD", "CYS", "LBF"])
-if "last_processed_click" not in st.session_state:
-    st.session_state.last_processed_click = None
+if "applied_cwas" not in st.session_state:
+    st.session_state.applied_cwas = user_cfg.get("last_selected_cwas", ["BOU", "GLD", "CYS", "LBF"])
 if "cached_data" not in st.session_state:
     st.session_state.cached_data = None
 if "generated_prompt" not in st.session_state:
@@ -258,8 +255,8 @@ with st.sidebar:
         chase_objective = "General Regional Weather & Hazards"
         max_drive_hours = 0
         max_allowed_cwas = len(HOME_BASE_CWAS)
-        if set(st.session_state.selected_cwas) != set(HOME_BASE_CWAS):
-            st.session_state.selected_cwas = HOME_BASE_CWAS.copy()
+        if set(st.session_state.applied_cwas) != set(HOME_BASE_CWAS):
+            st.session_state.applied_cwas = HOME_BASE_CWAS.copy()
             st.rerun()
     else:
         start_location = st.text_input("Starting Location", value=user_cfg.get("start_location", "Milliken, CO"))
@@ -287,12 +284,12 @@ with st.sidebar:
         user_cfg["start_location"] = start_location
         user_cfg["chase_objective"] = chase_objective
         user_cfg["max_drive_hours"] = max_drive_hours
-        user_cfg["last_selected_cwas"] = st.session_state.selected_cwas
+        user_cfg["last_selected_cwas"] = st.session_state.applied_cwas
         save_config(user_cfg)
         st.toast("Profile settings saved!", icon="💾")
 
 # --- MAIN UI: SELECTION MAP & BATCH SELECTION ---
-st.subheader("Interactive Threat Map & Office Selection")
+st.subheader("Target Selection & Threat Map")
 
 # Determine NOAA FeatureServer Layer ID
 if "Day-Before" in mode:
@@ -311,38 +308,52 @@ else:
 
 spc_data = fetch_spc_geojson(layer_id)
 
-# Quick Action Bar
+# Mobile-Optimized Manual Target Control Bar
 col_auto, col_clear, col_spacer = st.columns([1.5, 1, 3.5])
 with col_auto:
     if st.button("⚡ Auto-Select in Risk", use_container_width=True):
         auto_cwas = auto_detect_cwas_in_risk(spc_data, max_limit=max_allowed_cwas)
         if auto_cwas:
-            st.session_state.selected_cwas = auto_cwas
+            st.session_state.applied_cwas = auto_cwas
             st.rerun()
         else:
             st.toast("No threat areas (Marginal+) detected covering chase CWAs.", icon="ℹ️")
 
 with col_clear:
     if st.button("Clear All", use_container_width=True):
-        st.session_state.selected_cwas = []
+        st.session_state.applied_cwas = []
         st.rerun()
 
-# Synchronized Dropdown with Full Name Labels
-default_dropdown_options = [CWA_TO_OPTION[c] for c in st.session_state.selected_cwas if c in CWA_TO_OPTION]
+# 1. Multi-Select Target Input (Queue your selections without auto-reloading)
+initial_dropdown_selection = [CWA_TO_OPTION[c] for c in st.session_state.applied_cwas if c in CWA_TO_OPTION]
 
-selected_options = st.multiselect(
-    f"Active Office Targets ({len(st.session_state.selected_cwas)}/{max_allowed_cwas})",
-    options=OFFICE_OPTIONS,
-    default=default_dropdown_options,
-    max_selections=max_allowed_cwas,
-    help="Select from dropdown or click directly on the map pins below."
-)
+col_select, col_apply = st.columns([4, 1.5])
 
-# Sync dropdown selection changes to session_state
-parsed_cwas_from_dropdown = [OPTION_TO_CWA[opt] for opt in selected_options]
-if set(parsed_cwas_from_dropdown) != set(st.session_state.selected_cwas):
-    st.session_state.selected_cwas = parsed_cwas_from_dropdown
-    st.rerun()
+with col_select:
+    st_selected_options = st.multiselect(
+        f"Select Target CWAs (Max: {max_allowed_cwas})",
+        options=OFFICE_OPTIONS,
+        default=initial_dropdown_selection,
+        max_selections=max_allowed_cwas,
+        key="target_office_multiselect",
+        help="Select or search offices. Tap 'Update Map' when ready to apply."
+    )
+
+# Extract CWA codes from multi-select
+queued_cwas = [OPTION_TO_CWA[opt] for opt in st_selected_options]
+
+with col_apply:
+    st.write("")  # Alignment spacing
+    st.write("")
+    if st.button("🔄 Update Map", type="secondary", use_container_width=True):
+        st.session_state.applied_cwas = queued_cwas
+        st.rerun()
+
+# Active Target Chip Readout
+if st.session_state.applied_cwas:
+    st.write("**Currently Active:** " + " ".join([f"`{w}`" for w in st.session_state.applied_cwas]))
+else:
+    st.warning("No offices currently active. Choose offices above and tap 'Update Map'.")
 
 # Build Base Map
 m = folium.Map(
@@ -353,7 +364,7 @@ m = folium.Map(
     tiles="OpenStreetMap"
 )
 
-# 1. Overlay Live SPC Polygons
+# 2. Overlay Live SPC Polygons
 if spc_data and spc_data.get("features"):
     first_props = spc_data["features"][0].get("properties", {})
     tooltip_field = "label2" if "label2" in first_props else ("LABEL2" if "LABEL2" in first_props else "label")
@@ -375,13 +386,13 @@ if spc_data and spc_data.get("features"):
         name="SPC Convective Outlook"
     ).add_to(m)
 
-# 2. Overlay NWS CWA County Boundaries
+# 3. Overlay NWS CWA County Boundaries
 cwa_boundaries = fetch_cwa_boundaries()
 if cwa_boundaries and cwa_boundaries.get("features"):
     def cwa_style(feature):
         props = feature.get("properties", {})
         cwa_code = props.get("CWA", "")
-        is_sel = cwa_code in st.session_state.selected_cwas
+        is_sel = cwa_code in st.session_state.applied_cwas
         return {
             "fillColor": "#e53935" if is_sel else "#607d8b",
             "color": "#b71c1c" if is_sel else "#37474f",
@@ -396,9 +407,9 @@ if cwa_boundaries and cwa_boundaries.get("features"):
         name="NWS Boundaries"
     ).add_to(m)
 
-# 3. Permanent Office Centroid Markers (rendered on top)
+# 4. Permanent Office Centroid Markers (rendered on top)
 for cwa, data in CHASE_CWAS.items():
-    is_sel = cwa in st.session_state.selected_cwas
+    is_sel = cwa in st.session_state.applied_cwas
     folium.CircleMarker(
         location=[data["lat"], data["lon"]],
         radius=7 if is_sel else 4,
@@ -410,44 +421,17 @@ for cwa, data in CHASE_CWAS.items():
         tooltip=f"{cwa} — {data['name']}"
     ).add_to(m)
 
-# Capture clicks from the map
-map_state = st_folium(m, height=540, use_container_width=True, returned_objects=["last_clicked"])
-
-# Handle Map Click Toggle
-if map_state and map_state.get("last_clicked"):
-    current_click = (map_state["last_clicked"]["lat"], map_state["last_clicked"]["lng"])
-    
-    # Process only if this is a new click event
-    if current_click != st.session_state.last_processed_click:
-        st.session_state.last_processed_click = current_click
-        click_lat, click_lon = current_click
-        
-        closest_cwa = None
-        min_dist = 2.4
-        for cwa, data in CHASE_CWAS.items():
-            dist = ((data["lat"] - click_lat)**2 + (data["lon"] - click_lon)**2)**0.5
-            if dist < min_dist:
-                min_dist = dist
-                closest_cwa = cwa
-                
-        if closest_cwa:
-            if closest_cwa in st.session_state.selected_cwas:
-                st.session_state.selected_cwas.remove(closest_cwa)
-                st.rerun()
-            elif len(st.session_state.selected_cwas) < max_allowed_cwas:
-                st.session_state.selected_cwas.append(closest_cwa)
-                st.rerun()
-            else:
-                st.toast(f"Limit of {max_allowed_cwas} offices reached.", icon="⚠️")
+# Notice returned_objects=[] -> Completely eliminates map reloads on mobile screen touches
+st_folium(m, height=540, use_container_width=True, returned_objects=[])
 
 # --- COMPILE BRIEFING ---
 st.divider()
 if st.button("🚀 Fetch Text & Assemble Prompt", type="primary", use_container_width=True):
-    if not st.session_state.selected_cwas:
-        st.error("No offices selected.")
+    if not st.session_state.applied_cwas:
+        st.error("No offices selected. Please choose offices and click 'Update Map'.")
     else:
         with st.spinner("Fetching NWS discussions and SPC outlook text in parallel..."):
-            data = asyncio.run(fetch_all_discussions(st.session_state.selected_cwas, mode))
+            data = asyncio.run(fetch_all_discussions(st.session_state.applied_cwas, mode))
             st.session_state.cached_data = data
             st.session_state.generated_prompt = build_forecaster_prompt(
                 data=data,
