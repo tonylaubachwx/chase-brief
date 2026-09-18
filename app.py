@@ -37,33 +37,93 @@ def save_config(cfg):
 
 user_cfg = load_config()
 
-# --- CURATED CHASE CWAs WITH APPROXIMATE CENTROIDS (LAT, LON) ---
+# --- CURATED CHASE CWAs WITH METADATA & CENTROIDS ---
 CHASE_CWAS = {
     # High Plains / Rockies Foothills / Great Basin
-    "BOU": (40.0, -105.0), "PUB": (38.3, -104.6), "CYS": (41.1, -104.8), "GLD": (39.3, -101.7), "ABQ": (35.0, -106.6),
-    "GJT": (39.1, -108.5), "RIW": (43.1, -108.5), "SLC": (40.8, -111.9), "PIH": (42.9, -112.6),
+    "BOU": {"lat": 40.0, "lon": -105.0, "name": "Denver / Boulder, CO"},
+    "PUB": {"lat": 38.3, "lon": -104.6, "name": "Pueblo, CO"},
+    "CYS": {"lat": 41.1, "lon": -104.8, "name": "Cheyenne, WY"},
+    "GLD": {"lat": 39.3, "lon": -101.7, "name": "Goodland, KS"},
+    "ABQ": {"lat": 35.0, "lon": -106.6, "name": "Albuquerque, NM"},
+    "GJT": {"lat": 39.1, "lon": -108.5, "name": "Grand Junction, CO"},
+    "RIW": {"lat": 43.1, "lon": -108.5, "name": "Riverton, WY"},
+    "SLC": {"lat": 40.8, "lon": -111.9, "name": "Salt Lake City, UT"},
+    "PIH": {"lat": 42.9, "lon": -112.6, "name": "Pocatello / Idaho Falls, ID"},
+
     # Northern Plains & Northern Rockies
-    "BYZ": (45.8, -108.5), "GGW": (48.2, -106.6), "TFX": (47.5, -111.4),
-    "UNR": (44.1, -103.2), "ABR": (45.4, -98.4),  "FSD": (43.6, -96.7),  "FGF": (47.9, -97.1),  "BIS": (46.8, -100.7),
+    "BYZ": {"lat": 45.8, "lon": -108.5, "name": "Billings, MT"},
+    "GGW": {"lat": 48.2, "lon": -106.6, "name": "Glasgow, MT"},
+    "TFX": {"lat": 47.5, "lon": -111.4, "name": "Great Falls, MT"},
+    "UNR": {"lat": 44.1, "lon": -103.2, "name": "Rapid City, SD"},
+    "ABR": {"lat": 45.4, "lon": -98.4,  "name": "Aberdeen, SD"},
+    "FSD": {"lat": 43.6, "lon": -96.7,  "name": "Sioux Falls, SD"},
+    "FGF": {"lat": 47.9, "lon": -97.1,  "name": "Eastern ND / Grand Forks, ND"},
+    "BIS": {"lat": 46.8, "lon": -100.7, "name": "Bismarck, ND"},
+
     # Central Plains
-    "LBF": (41.1, -100.7), "GID": (40.9, -98.3),  "OAX": (41.3, -96.0),  "DDC": (37.8, -100.0), "TOP": (39.1, -95.6), "ICT": (37.6, -97.4),
+    "LBF": {"lat": 41.1, "lon": -100.7, "name": "North Platte, NE"},
+    "GID": {"lat": 40.9, "lon": -98.3,  "name": "Hastings, NE"},
+    "OAX": {"lat": 41.3, "lon": -96.0,  "name": "Omaha, NE"},
+    "DDC": {"lat": 37.8, "lon": -100.0, "name": "Dodge City, KS"},
+    "TOP": {"lat": 39.1, "lon": -95.6,  "name": "Topeka, KS"},
+    "ICT": {"lat": 37.6, "lon": -97.4,  "name": "Wichita, KS"},
+
     # Southern Plains & Red River
-    "AMA": (35.2, -101.7), "LUB": (33.6, -101.8), "MAF": (32.0, -102.2), "SJT": (31.4, -100.5), "OUN": (35.2, -97.4),
-    "TSA": (36.2, -95.9),  "FWD": (32.8, -97.3),
+    "AMA": {"lat": 35.2, "lon": -101.7, "name": "Amarillo, TX"},
+    "LUB": {"lat": 33.6, "lon": -101.8, "name": "Lubbock, TX"},
+    "MAF": {"lat": 32.0, "lon": -102.2, "name": "Midland / Odessa, TX"},
+    "SJT": {"lat": 31.4, "lon": -100.5, "name": "San Angelo, TX"},
+    "OUN": {"lat": 35.2, "lon": -97.4,  "name": "Norman / OKC, OK"},
+    "TSA": {"lat": 36.2, "lon": -95.9,  "name": "Tulsa, OK"},
+    "FWD": {"lat": 32.8, "lon": -97.3,  "name": "Dallas / Fort Worth, TX"},
+
     # Desert Southwest
-    "FGZ": (35.2, -111.8), "TWC": (32.2, -110.9), "PSR": (33.4, -112.0), "EPZ": (31.8, -106.4),
+    "FGZ": {"lat": 35.2, "lon": -111.8, "name": "Flagstaff, AZ"},
+    "TWC": {"lat": 32.2, "lon": -110.9, "name": "Tucson, AZ"},
+    "PSR": {"lat": 33.4, "lon": -112.0, "name": "Phoenix, AZ"},
+    "EPZ": {"lat": 31.8, "lon": -106.4, "name": "El Paso, TX"},
+
     # Texas Coastal / South
-    "EWX": (29.7, -98.0),  "HGX": (29.5, -95.1),  "CRP": (27.8, -97.5),  "BRO": (25.9, -97.4),
+    "EWX": {"lat": 29.7, "lon": -98.0,  "name": "Austin / San Antonio, TX"},
+    "HGX": {"lat": 29.5, "lon": -95.1,  "name": "Houston / Galveston, TX"},
+    "CRP": {"lat": 27.8, "lon": -97.5,  "name": "Corpus Christi, TX"},
+    "BRO": {"lat": 25.9, "lon": -97.4,  "name": "Brownsville, TX"},
+
     # Upper Midwest / Great Lakes / Corn Belt
-    "MPX": (44.8, -93.6),  "ARX": (43.8, -91.2),  "DMX": (41.7, -93.7),  "DVN": (41.6, -90.6),  "LOT": (41.6, -88.1),
-    "ILX": (40.1, -89.3),  "MKX": (43.0, -88.5),  "GRB": (44.5, -88.1),  "GRR": (42.9, -85.5),
+    "MPX": {"lat": 44.8, "lon": -93.6,  "name": "Twin Cities / Chanhassen, MN"},
+    "ARX": {"lat": 43.8, "lon": -91.2,  "name": "La Crosse, WI"},
+    "DMX": {"lat": 41.7, "lon": -93.7,  "name": "Des Moines, IA"},
+    "DVN": {"lat": 41.6, "lon": -90.6,  "name": "Quad Cities / Davenport, IA"},
+    "LOT": {"lat": 41.6, "lon": -88.1,  "name": "Chicago, IL"},
+    "ILX": {"lat": 40.1, "lon": -89.3,  "name": "Central Illinois / Lincoln, IL"},
+    "MKX": {"lat": 43.0, "lon": -88.5,  "name": "Milwaukee, WI"},
+    "GRB": {"lat": 44.5, "lon": -88.1,  "name": "Green Bay, WI"},
+    "GRR": {"lat": 42.9, "lon": -85.5,  "name": "Grand Rapids, MI"},
+
     # Mid-Mississippi / Ohio Valley
-    "EAX": (38.8, -94.3),  "SGF": (37.2, -93.4),  "LSX": (38.7, -90.7),  "PAH": (37.1, -88.8),  "ILN": (39.4, -83.8),
-    "IND": (39.7, -86.3),  "IWX": (41.4, -85.2),  "LMK": (38.1, -85.7),  "JKL": (37.6, -83.3),  "CLE": (41.4, -81.8),
+    "EAX": {"lat": 38.8, "lon": -94.3,  "name": "Kansas City / Pleasant Hill, MO"},
+    "SGF": {"lat": 37.2, "lon": -93.4,  "name": "Springfield, MO"},
+    "LSX": {"lat": 38.7, "lon": -90.7,  "name": "St. Louis, MO"},
+    "PAH": {"lat": 37.1, "lon": -88.8,  "name": "Paducah, KY"},
+    "ILN": {"lat": 39.4, "lon": -83.8,  "name": "Wilmington / Cincinnati, OH"},
+    "IND": {"lat": 39.7, "lon": -86.3,  "name": "Indianapolis, IN"},
+    "IWX": {"lat": 41.4, "lon": -85.2,  "name": "Northern Indiana, IN"},
+    "LMK": {"lat": 38.1, "lon": -85.7,  "name": "Louisville, KY"},
+    "JKL": {"lat": 37.6, "lon": -83.3,  "name": "Jackson, KY"},
+    "CLE": {"lat": 41.4, "lon": -81.8,  "name": "Cleveland, OH"},
+
     # Mid-South / Delta / Southeast Fringe
-    "LZK": (34.8, -92.3),  "SHV": (32.4, -93.8),  "LCH": (30.1, -93.2),  "MEG": (35.0, -89.9),  "JAN": (32.3, -90.1),
-    "LIX": (30.3, -89.8),  "MOB": (30.7, -88.2),  "HUN": (34.7, -86.8),  "BMX": (33.2, -86.8),  "OHX": (36.2, -86.6),
-    "MRX": (36.2, -83.4)
+    "LZK": {"lat": 34.8, "lon": -92.3,  "name": "Little Rock, AR"},
+    "SHV": {"lat": 32.4, "lon": -93.8,  "name": "Shreveport, LA"},
+    "LCH": {"lat": 30.1, "lon": -93.2,  "name": "Lake Charles, LA"},
+    "MEG": {"lat": 35.0, "lon": -89.9,  "name": "Memphis, TN"},
+    "JAN": {"lat": 32.3, "lon": -90.1,  "name": "Jackson, MS"},
+    "LIX": {"lat": 30.3, "lon": -89.8,  "name": "New Orleans / Slidell, LA"},
+    "MOB": {"lat": 30.7, "lon": -88.2,  "name": "Mobile, AL"},
+    "HUN": {"lat": 34.7, "lon": -86.8,  "name": "Huntsville, AL"},
+    "BMX": {"lat": 33.2, "lon": -86.8,  "name": "Birmingham, AL"},
+    "OHX": {"lat": 36.2, "lon": -86.6,  "name": "Nashville, TN"},
+    "MRX": {"lat": 36.2, "lon": -83.4,  "name": "Morristown / Knoxville, TN"}
 }
 
 HOME_BASE_CWAS = ["BOU", "PUB", "GJT", "CYS", "LBF", "GLD", "DDC"]
@@ -77,6 +137,11 @@ SPC_COLORS = {
     "HIGH": "#ff00ff"
 }
 
+# Mapping helpers for dropdown display
+OFFICE_OPTIONS = [f"{cwa} — {data['name']}" for cwa, data in CHASE_CWAS.items()]
+CWA_TO_OPTION = {cwa: f"{cwa} — {data['name']}" for cwa, data in CHASE_CWAS.items()}
+OPTION_TO_CWA = {f"{cwa} — {data['name']}": cwa for cwa, data in CHASE_CWAS.items()}
+
 # --- NOAA ARCGIS DATA FETCHERS ---
 
 @st.cache_data(ttl=900)
@@ -84,7 +149,7 @@ def fetch_spc_geojson(layer_id: int):
     """Queries NOAA's ArcGIS FeatureServer for real-time SPC outlook polygons."""
     url = f"https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/SPC_wx_outlks/FeatureServer/{layer_id}/query"
     params = {"where": "1=1", "outFields": "*", "f": "geojson", "outSR": "4326"}
-    headers = {"User-Agent": "(ChaseBriefGenerator/1.4, contact: stormbriefs@weatherops.org)"}
+    headers = {"User-Agent": "(ChaseBriefGenerator/1.5, contact: stormbriefs@weatherops.org)"}
     try:
         r = httpx.get(url, params=params, headers=headers, timeout=7.0)
         if r.status_code == 200:
@@ -97,13 +162,8 @@ def fetch_spc_geojson(layer_id: int):
 def fetch_cwa_boundaries():
     """Queries official NOAA NWS Reference MapServer for CWA polygons."""
     url = "https://mapservices.weather.noaa.gov/static/rest/services/nws_reference_maps/nws_reference_map/FeatureServer/1/query"
-    params = {
-        "where": "1=1",
-        "outFields": "cwa,wfo",
-        "f": "geojson",
-        "outSR": "4326"
-    }
-    headers = {"User-Agent": "(ChaseBriefGenerator/1.4, contact: stormbriefs@weatherops.org)"}
+    params = {"where": "1=1", "outFields": "cwa,wfo", "f": "geojson", "outSR": "4326"}
+    headers = {"User-Agent": "(ChaseBriefGenerator/1.5, contact: stormbriefs@weatherops.org)"}
     try:
         r = httpx.get(url, params=params, headers=headers, timeout=12.0)
         if r.status_code == 200:
@@ -160,8 +220,8 @@ def auto_detect_cwas_in_risk(spc_geojson, max_limit=10):
                 polygons.extend(poly)
                 
         for ring in polygons:
-            for cwa, (lat, lon) in CHASE_CWAS.items():
-                if point_in_polygon(lat, lon, ring):
+            for cwa, data in CHASE_CWAS.items():
+                if point_in_polygon(data["lat"], data["lon"], ring):
                     matching_cwas.add(cwa)
                     
     return list(matching_cwas)[:max_limit]
@@ -169,6 +229,8 @@ def auto_detect_cwas_in_risk(spc_geojson, max_limit=10):
 # --- SESSION STATE INITIALIZATION ---
 if "selected_cwas" not in st.session_state:
     st.session_state.selected_cwas = user_cfg.get("last_selected_cwas", ["BOU", "GLD", "CYS", "LBF"])
+if "last_processed_click" not in st.session_state:
+    st.session_state.last_processed_click = None
 if "cached_data" not in st.session_state:
     st.session_state.cached_data = None
 if "generated_prompt" not in st.session_state:
@@ -249,25 +311,9 @@ else:
 
 spc_data = fetch_spc_geojson(layer_id)
 
-# Batch multi-selection controls (prevents repetitive reloads on mobile)
-all_office_keys = sorted(list(CHASE_CWAS.keys()))
-col_multi, col_auto, col_clear = st.columns([3, 1.5, 1])
-
-with col_multi:
-    selected_from_ui = st.multiselect(
-        f"Selected CWAs ({len(st.session_state.selected_cwas)}/{max_allowed_cwas})",
-        options=all_office_keys,
-        default=st.session_state.selected_cwas,
-        max_selections=max_allowed_cwas,
-        help="Select or search office IDs. The map will highlight all choices."
-    )
-    if set(selected_from_ui) != set(st.session_state.selected_cwas):
-        st.session_state.selected_cwas = selected_from_ui
-        st.rerun()
-
+# Quick Action Bar
+col_auto, col_clear, col_spacer = st.columns([1.5, 1, 3.5])
 with col_auto:
-    st.write("")
-    st.write("")
     if st.button("⚡ Auto-Select in Risk", use_container_width=True):
         auto_cwas = auto_detect_cwas_in_risk(spc_data, max_limit=max_allowed_cwas)
         if auto_cwas:
@@ -277,11 +323,26 @@ with col_auto:
             st.toast("No threat areas (Marginal+) detected covering chase CWAs.", icon="ℹ️")
 
 with col_clear:
-    st.write("")
-    st.write("")
     if st.button("Clear All", use_container_width=True):
         st.session_state.selected_cwas = []
         st.rerun()
+
+# Synchronized Dropdown with Full Name Labels
+default_dropdown_options = [CWA_TO_OPTION[c] for c in st.session_state.selected_cwas if c in CWA_TO_OPTION]
+
+selected_options = st.multiselect(
+    f"Active Office Targets ({len(st.session_state.selected_cwas)}/{max_allowed_cwas})",
+    options=OFFICE_OPTIONS,
+    default=default_dropdown_options,
+    max_selections=max_allowed_cwas,
+    help="Select from dropdown or click directly on the map pins below."
+)
+
+# Sync dropdown selection changes to session_state
+parsed_cwas_from_dropdown = [OPTION_TO_CWA[opt] for opt in selected_options]
+if set(parsed_cwas_from_dropdown) != set(st.session_state.selected_cwas):
+    st.session_state.selected_cwas = parsed_cwas_from_dropdown
+    st.rerun()
 
 # Build Base Map
 m = folium.Map(
@@ -336,21 +397,48 @@ if cwa_boundaries and cwa_boundaries.get("features"):
     ).add_to(m)
 
 # 3. Permanent Office Centroid Markers (rendered on top)
-for cwa, (lat, lon) in CHASE_CWAS.items():
+for cwa, data in CHASE_CWAS.items():
     is_sel = cwa in st.session_state.selected_cwas
     folium.CircleMarker(
-        location=[lat, lon],
+        location=[data["lat"], data["lon"]],
         radius=7 if is_sel else 4,
         color="#000000",
         weight=1.5 if is_sel else 1.0,
         fill=True,
         fill_color="#e53935" if is_sel else "#1e88e5",
         fill_opacity=1.0 if is_sel else 0.7,
-        tooltip=f"WFO {cwa}"
+        tooltip=f"{cwa} — {data['name']}"
     ).add_to(m)
 
-# Render map without capturing clicks into Python (prevents page jump/reload on touch)
-st_folium(m, height=540, use_container_width=True, returned_objects=[])
+# Capture clicks from the map
+map_state = st_folium(m, height=540, use_container_width=True, returned_objects=["last_clicked"])
+
+# Handle Map Click Toggle
+if map_state and map_state.get("last_clicked"):
+    current_click = (map_state["last_clicked"]["lat"], map_state["last_clicked"]["lng"])
+    
+    # Process only if this is a new click event
+    if current_click != st.session_state.last_processed_click:
+        st.session_state.last_processed_click = current_click
+        click_lat, click_lon = current_click
+        
+        closest_cwa = None
+        min_dist = 2.4
+        for cwa, data in CHASE_CWAS.items():
+            dist = ((data["lat"] - click_lat)**2 + (data["lon"] - click_lon)**2)**0.5
+            if dist < min_dist:
+                min_dist = dist
+                closest_cwa = cwa
+                
+        if closest_cwa:
+            if closest_cwa in st.session_state.selected_cwas:
+                st.session_state.selected_cwas.remove(closest_cwa)
+                st.rerun()
+            elif len(st.session_state.selected_cwas) < max_allowed_cwas:
+                st.session_state.selected_cwas.append(closest_cwa)
+                st.rerun()
+            else:
+                st.toast(f"Limit of {max_allowed_cwas} offices reached.", icon="⚠️")
 
 # --- COMPILE BRIEFING ---
 st.divider()
