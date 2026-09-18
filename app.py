@@ -84,7 +84,7 @@ def fetch_spc_geojson(layer_id: int):
     """Queries NOAA's ArcGIS FeatureServer for real-time SPC outlook polygons."""
     url = f"https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/SPC_wx_outlks/FeatureServer/{layer_id}/query"
     params = {"where": "1=1", "outFields": "*", "f": "geojson", "outSR": "4326"}
-    headers = {"User-Agent": "(ChaseBriefGenerator/1.3, contact: stormbriefs@weatherops.org)"}
+    headers = {"User-Agent": "(ChaseBriefGenerator/1.4, contact: stormbriefs@weatherops.org)"}
     try:
         r = httpx.get(url, params=params, headers=headers, timeout=7.0)
         if r.status_code == 200:
@@ -103,7 +103,7 @@ def fetch_cwa_boundaries():
         "f": "geojson",
         "outSR": "4326"
     }
-    headers = {"User-Agent": "(ChaseBriefGenerator/1.3, contact: stormbriefs@weatherops.org)"}
+    headers = {"User-Agent": "(ChaseBriefGenerator/1.4, contact: stormbriefs@weatherops.org)"}
     try:
         r = httpx.get(url, params=params, headers=headers, timeout=12.0)
         if r.status_code == 200:
@@ -229,16 +229,8 @@ with st.sidebar:
         save_config(user_cfg)
         st.toast("Profile settings saved!", icon="💾")
 
-# --- MAIN UI: SELECTION MAP ---
-st.subheader("Interactive Office Selection & Threat Map")
-st.caption(f"Click pins or anywhere within an office territory to toggle. Max allowed: {max_allowed_cwas}. Selected: {len(st.session_state.selected_cwas)}/{max_allowed_cwas}")
-
-# Quick action bar
-col_actions, col_auto, col_spacer = st.columns([1, 2, 3])
-with col_actions:
-    if st.button("Clear All", use_container_width=True):
-        st.session_state.selected_cwas = []
-        st.rerun()
+# --- MAIN UI: SELECTION MAP & BATCH SELECTION ---
+st.subheader("Interactive Threat Map & Office Selection")
 
 # Determine NOAA FeatureServer Layer ID
 if "Day-Before" in mode:
@@ -257,14 +249,39 @@ else:
 
 spc_data = fetch_spc_geojson(layer_id)
 
+# Batch multi-selection controls (prevents repetitive reloads on mobile)
+all_office_keys = sorted(list(CHASE_CWAS.keys()))
+col_multi, col_auto, col_clear = st.columns([3, 1.5, 1])
+
+with col_multi:
+    selected_from_ui = st.multiselect(
+        f"Selected CWAs ({len(st.session_state.selected_cwas)}/{max_allowed_cwas})",
+        options=all_office_keys,
+        default=st.session_state.selected_cwas,
+        max_selections=max_allowed_cwas,
+        help="Select or search office IDs. The map will highlight all choices."
+    )
+    if set(selected_from_ui) != set(st.session_state.selected_cwas):
+        st.session_state.selected_cwas = selected_from_ui
+        st.rerun()
+
 with col_auto:
-    if st.button("⚡ Auto-Select CWAs in Risk Area", use_container_width=True):
+    st.write("")
+    st.write("")
+    if st.button("⚡ Auto-Select in Risk", use_container_width=True):
         auto_cwas = auto_detect_cwas_in_risk(spc_data, max_limit=max_allowed_cwas)
         if auto_cwas:
             st.session_state.selected_cwas = auto_cwas
             st.rerun()
         else:
             st.toast("No threat areas (Marginal+) detected covering chase CWAs.", icon="ℹ️")
+
+with col_clear:
+    st.write("")
+    st.write("")
+    if st.button("Clear All", use_container_width=True):
+        st.session_state.selected_cwas = []
+        st.rerun()
 
 # Build Base Map
 m = folium.Map(
@@ -329,39 +346,11 @@ for cwa, (lat, lon) in CHASE_CWAS.items():
         fill=True,
         fill_color="#e53935" if is_sel else "#1e88e5",
         fill_opacity=1.0 if is_sel else 0.7,
-        tooltip=f"WFO {cwa} (Click to toggle)"
+        tooltip=f"WFO {cwa}"
     ).add_to(m)
 
-map_state = st_folium(m, height=560, use_container_width=True, returned_objects=["last_clicked"])
-
-# Handle Map Click Toggle
-if map_state and map_state.get("last_clicked"):
-    click_lat = map_state["last_clicked"]["lat"]
-    click_lon = map_state["last_clicked"]["lng"]
-    
-    closest_cwa = None
-    min_dist = 2.4
-    for cwa, (lat, lon) in CHASE_CWAS.items():
-        dist = ((lat - click_lat)**2 + (lon - click_lon)**2)**0.5
-        if dist < min_dist:
-            min_dist = dist
-            closest_cwa = cwa
-            
-    if closest_cwa:
-        if closest_cwa in st.session_state.selected_cwas:
-            st.session_state.selected_cwas.remove(closest_cwa)
-            st.rerun()
-        elif len(st.session_state.selected_cwas) < max_allowed_cwas:
-            st.session_state.selected_cwas.append(closest_cwa)
-            st.rerun()
-        else:
-            st.toast(f"Limit of {max_allowed_cwas} offices reached.", icon="⚠️")
-
-# Display Active Office Chips
-if st.session_state.selected_cwas:
-    st.write("**Active Offices:** " + " ".join([f"`{w}`" for w in st.session_state.selected_cwas]))
-else:
-    st.warning("Please select at least one office on the map above.")
+# Render map without capturing clicks into Python (prevents page jump/reload on touch)
+st_folium(m, height=540, use_container_width=True, returned_objects=[])
 
 # --- COMPILE BRIEFING ---
 st.divider()
