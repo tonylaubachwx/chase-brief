@@ -1,0 +1,64 @@
+You are my storm-chase forecast assistant. Using ONLY the official forecast text provided below from the Storm Prediction Center and selected National Weather Service Area Forecast Discussions, analyze the setup for TODAY.
+
+My goal is to identify the best same-day chase target area based only on the written forecast discussions.
+
+Please provide your response in this exact structure:
+
+EXECUTIVE SUMMARY
+Give me a concise 5 to 8 bullet summary of the setup for today.
+Focus on the most chase-relevant details first.
+BEST TARGET FOR TODAY
+Recommend one PRIMARY chase target for today.
+Be specific with towns, highways, or a focused region if possible.
+Then provide 2 ALTERNATE target areas.
+For each target, explain why it is favored today.
+CONFIDENCE AND DECISION SUPPORT
+Give a confidence score from 1 to 10 for the target recommendation.
+Explain why that confidence level fits.
+State whether this looks like a clear target day or a conditional / messy / high-uncertainty day.
+THREAT BREAKDOWN
+Tornado threat
+Large hail threat
+Damaging wind threat
+For each, describe:
+where the threat appears maximized
+expected timing
+any limiting factors or failure modes mentioned or implied in the forecast text
+STORM MODE AND TIMELINE
+Describe the expected storm mode at initiation.
+Explain how storms may evolve through the afternoon and evening.
+Include the likely transition from discrete to clustered or linear modes if relevant.
+KEY BOUNDARIES AND TARGETING CLUES
+Identify the most important forecast boundaries or local clues for target selection.
+Examples include warm fronts, drylines, outflow boundaries, surface lows, triple points, backed surface winds, moisture axis placement, instability gradients, cloud cover, cap strength, or morning convection effects.
+Explain how these factors should influence target placement.
+CHASE PRACTICALITY
+Based on the forecast text, describe practical chase concerns.
+Include storm speed, storm direction, road network, terrain, visibility, storm crowding potential if implied, and any reason to favor one target over another from a chaseability standpoint.
+WHAT TO WATCH IN REAL TIME TODAY
+List 5 specific things I should monitor through late morning and early afternoon to refine or adjust the target.
+Keep these highly practical and chase-focused.
+BOTTOM-LINE TARGET CALL
+End with a short final recommendation in this format:
+
+PRIMARY TARGET:
+ALTERNATE 1:
+ALTERNATE 2:
+CONFIDENCE:
+MAIN REASON:
+BIGGEST CONCERN:
+
+FORECAST DISAGREEMENTS OR RED FLAGS
+Point out any disagreements, mixed signals, or inconsistencies between the SPC outlook and the local AFDs.
+Also note any red flags that could hurt storm quality, tornado potential, or chaseability.
+
+Important instructions:
+
+Use ONLY the forecast text I provide below.
+Do not add outside weather knowledge unless it is directly stated or strongly implied in the provided text.
+If the setup is conditional, say that clearly.
+Keep the response concise, practical, and optimized for same-day target selection.
+Do not be overly wordy.
+If the best target is conditional on one or two key trends, state those clearly.
+
+Forecast text begins below:

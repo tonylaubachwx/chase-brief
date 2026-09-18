@@ -1,0 +1,54 @@
+You are my storm-chase forecast assistant. Using ONLY the official forecast text provided below from the Storm Prediction Center and selected National Weather Service Area Forecast Discussions, analyze the setup for TOMORROW.
+
+My goal is to identify the best chase target area for the next day, based only on the written forecast discussions.
+
+Please provide your response in this exact structure:
+
+EXECUTIVE SUMMARY
+Give me a concise 5 to 8 bullet summary of the overall setup.
+Focus on the synoptic pattern, mesoscale factors, expected severe threat, and the general corridor most favored for storm development.
+BEST CHASE TARGET
+Recommend one PRIMARY target area for tomorrow.
+Be specific with towns, highways, or a focused region if possible.
+Then provide 2 ALTERNATE target areas.
+For each target, explain why it is favored.
+CONFIDENCE AND FORECAST QUALITY
+Give a confidence score from 1 to 10 for the overall setup.
+Explain what is increasing confidence.
+Explain what is reducing confidence or adding uncertainty.
+THREAT BREAKDOWN
+Tornado threat
+Large hail threat
+Damaging wind threat
+For each, describe:
+where the threat appears maximized
+the likely timing window
+any limiting factors mentioned or implied in the forecast text
+STORM MODE AND EVOLUTION
+Describe the likely storm mode at initiation.
+Explain how storms may evolve through the day and evening.
+Note whether the setup favors discrete supercells, clusters, messy convection, upscale growth, or a QLCS transition.
+IMPORTANT BOUNDARIES AND TRIGGERS
+Identify the most important forecast boundaries or focus mechanisms mentioned or strongly implied in the text.
+Examples include drylines, warm fronts, outflow boundaries, surface lows, triple points, cold fronts, moisture gradients, upslope zones, or capping issues.
+Explain why each matters for targeting.
+CHASE STRATEGY NOTES
+Based on the forecast text, describe practical chase considerations for tomorrow.
+Include likely storm motions, terrain concerns, road network concerns, visibility concerns, and whether the setup looks like an early commitment or a wait-and-see type of day.
+WHAT I SHOULD WATCH TOMORROW MORNING
+List 5 specific things I should check the next morning to refine the target.
+These can include boundary placement, cloud cover, moisture return, cap strength, morning convection, model trends, surface observations, or any other key forecast issue.
+FORECAST DISAGREEMENTS OR RED FLAGS
+Point out any disagreements, mixed signals, or inconsistencies between the SPC outlook and the local AFDs.
+Also note any red flags that could bust or reduce chase quality.
+
+Important instructions:
+
+Use ONLY the forecast text I provide below.
+Do not invent data or rely on outside knowledge.
+If the forecast text is vague or conflicting, say so clearly.
+Keep the response concise, practical, and written for storm-chase target selection.
+Do not be overly wordy.
+If one region appears favored but conditional, explain what needs to happen for it to become the better target.
+
+Forecast text begins below:
